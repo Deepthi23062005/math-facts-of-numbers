@@ -13,17 +13,17 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- SIMULATED DATA GENERATION (Dataset 1: BH-NS Mergers) ---
+# --- DATA GENERATION (Dataset 1: BH-NS Mergers) ---
 @st.cache_data
 def load_waveform_data():
-    # Simulating data mapping to William Henry Lee's Newtonian SPH calculations
+    # Simulated mapping mimicking William Henry Lee's Newtonian physics SPH calculations
     t = np.linspace(-0.1, 0.02, 1200)
     frequency = 60 / (0.01 - t + 1e-5)**0.25 
     amplitude = 1e-21 * (0.01 - t + 1e-5)**-0.25
-    amplitude[t > 0.01] = 0  # Tidal disruption cutoff point
+    amplitude[t > 0.01] = 0  # Coalescence/disruption cutoff point
     strain = amplitude * np.sin(2 * np.pi * frequency * t)
     radius = np.maximum(12, 110 * (0.01 - t + 1e-5)**0.25)
-    energy_loss = 1e52 * (radius**-5) # Simulated GW energy backreaction flux
+    energy_loss = 1e52 * (radius**-5)
     
     return pd.DataFrame({
         "Time (s)": t,
@@ -33,10 +33,10 @@ def load_waveform_data():
         "Energy Flux (ergs/s)": energy_loss
     })
 
-# --- SIMULATED DATA GENERATION (Dataset 2: Math Facts) ---
+# --- DATA GENERATION (Dataset 2: Math Facts) ---
 @st.cache_data
 def load_math_facts():
-    # Sample matrix mimicking the Numbers_facts.csv structure
+    # Structured to explicitly map to column fields: 'number' and 'text'
     facts = {
         "number": [1, 2, 3, 7, 12, 28, 42, 137],
         "text": [
@@ -52,7 +52,7 @@ def load_math_facts():
     }
     return pd.DataFrame(facts)
 
-# Load datasets
+# Load data assets safely
 df_wave = load_waveform_data()
 df_facts = load_math_facts()
 
@@ -61,7 +61,7 @@ st.sidebar.image("https://images.unsplash.com/photo-1462331940025-496dfbfc7564?a
 st.sidebar.title("🛠️ Universal Control Desk")
 st.sidebar.markdown("Configure parameters below and hit **Submit** to process.")
 
-# Module Selector
+# Module Selector Matrix
 app_mode = st.sidebar.selectbox("Choose Dashboard Module", ["🌌 BH-NS Binary Mergers", "🔢 Mathematical Trivia Oracle"])
 
 if app_mode == "🌌 BH-NS Binary Mergers":
@@ -72,7 +72,6 @@ if app_mode == "🌌 BH-NS Binary Mergers":
     gamma_index = st.sidebar.selectbox("Ideal Gas Gamma Index (Equation of State)", [1.4, 1.67, 2.0])
     
     submit_button = st.sidebar.button("💥 Simulate Coalescence", use_container_width=True)
-
 else:
     st.sidebar.subheader("Trivia Tuning")
     selected_num = st.sidebar.slider("Pick a Number to Inspect", 1, 150, 28)
@@ -87,7 +86,7 @@ if app_mode == "🌌 BH-NS Binary Mergers":
     st.caption("Investigating point-mass gravitational radiation backreaction and tidal disruptions via 3D SPH simulations.")
     st.markdown("This module explores gravitational radiation waveforms modeled using Newtonian physics combined with gas equations of state.")
     
-    # Static KPIs
+    # Render layout metrics natively to avoid HTML string token errors
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         st.metric("Mass Ratio (q)", f"{bh_mass / ns_mass:.2f}")
@@ -101,13 +100,14 @@ if app_mode == "🌌 BH-NS Binary Mergers":
         
     st.write("---")
     
-    # Default Base Charts
     st.subheader("📊 Base Waveform Profiles")
     t1, t2 = st.tabs(["🔊 Gravitational Wave Strain h(t)", "🪐 Orbital Separation Decay"])
     
     with t1:
         fig_s = px.line(df_wave, x="Time (s)", y="Strain", title="Gravitational Radiation Strain Signature")
-        fig_s.update_layout(template="plotly_dark", line_color="#3B82F6")
+        # FIXED: Properties separated completely to ensure Python 3.14 stability
+        fig_s.update_layout(template="plotly_dark")
+        fig_s.update_traces(line_color="#3B82F6")
         st.plotly_chart(fig_s, use_container_width=True)
         
     with t2:
@@ -116,7 +116,6 @@ if app_mode == "🌌 BH-NS Binary Mergers":
         fig_r.update_layout(title="Orbital Distance Contraction", template="plotly_dark", xaxis_title="Time (s)", yaxis_title="Separation (km)")
         st.plotly_chart(fig_r, use_container_width=True)
 
-    # Triggered Actions on Submit Button
     if submit_button:
         st.write("---")
         st.subheader("🔮 Dynamically Generated Insights")
@@ -143,7 +142,6 @@ if app_mode == "🌌 BH-NS Binary Mergers":
             else:
                 st.success("✨ **Accretion Disk Formed:** Tidal forces will tear the neutron star apart before it collapses into the horizon. This is expected to release a bright electromagnetic short Gamma-Ray Burst (sGRB)!")
                 
-        # Additional Premium Visuals on Submit
         fig_f = px.area(df_wave, x="Time (s)", y="Frequency (Hz)", title="Dynamic Frequency Shift (Chirp Phenomenon Profile)", color_discrete_sequence=['#EC4899'])
         fig_f.update_layout(template="plotly_dark")
         st.plotly_chart(fig_f, use_container_width=True)
@@ -160,48 +158,20 @@ else:
     st.caption("Exploring properties, relationships, and hidden trivia behind numerical entities.")
     st.markdown("Every number has an identity. This system parses mathematical properties to find structural relationships.")
     
-    # Display the underlying database dynamically
     with st.expander("📂 Inspect Raw Math Facts Database Matrix"):
         st.dataframe(df_facts, use_container_width=True)
         
     st.write("---")
     
-    # Main visual chart showing properties layout
     st.subheader("📊 Numerical Frequency Spectrum Analysis")
     fig_bar = px.bar(df_facts, x="number", y="number", title="Stored Fact Identity Indexes", labels={"number":"Value Spectrum"}, color="number", color_continuous_scale="Viridis")
     fig_bar.update_layout(template="plotly_dark")
     st.plotly_chart(fig_bar, use_container_width=True)
 
-    # Triggered Actions on Submit Button
     if submit_button:
         st.write("---")
         st.subheader("🎯 Fact Extraction Breakdown")
         
-        with st.spinner("Querrying matrix properties..."):
-            time.sleep(0.6)
-            
-        # Check if user input exists in the data framework
-        matched_row = df_facts[df_facts["number"] == selected_num]
-        
-        if not matched_row.empty:
-            fact_text = matched_row.iloc[0]["text"]
-            st.balloons()
-            st.success(f"### 🎉 Mathematical Profile for Number {selected_num}")
-            st.markdown(f"> **{fact_text}**")
-        else:
-            # Dynamically generate facts if user inputs something outside the mock dataset
-            st.warning(f"Number {selected_num} is not cached in the core CSV database. However, here is its baseline structural property:")
-            is_even = "Even" if selected_num % 2 == 0 else "Odd"
-            st.info(f"**Generic Property Matrix:** Number `{selected_num}` is an **{is_even}** integer, its square is **{selected_num**2}**, and its square root calculates to **{np.sqrt(selected_num):.4f}**.")
-            
-        # Fun dynamic math visualization insight
-        st.subheader("📐 Multiplier Matrix Map")
-        x_vals = np.arange(1, 11)
-        y_vals = x_vals * selected_num
-        
-        fig_line = px.line(x=x_vals, y=y_vals, title=f"Linear Multiplier Scalability for Factor {selected_num}", labels={"x": "Multiplier Range", "y": "Product Amplitude"})
-        fig_line.update_layout(template="plotly_dark", line_color="#10B981")
-        st.plotly_chart(fig_line, use_container_width=True)
-        
-    else:
-        st.info("💡 Pick an integer on the left panel and click **Extract Trivia Fact** to run an index look-up.")
+        with st.spinner("Querying matrix properties..."):
+            time.sleep(0
+     
