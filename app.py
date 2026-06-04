@@ -105,7 +105,6 @@ if app_mode == "🌌 BH-NS Binary Mergers":
     
     with t1:
         fig_s = px.line(df_wave, x="Time (s)", y="Strain", title="Gravitational Radiation Strain Signature")
-        # FIXED: Properties separated completely to ensure Python 3.14 stability
         fig_s.update_layout(template="plotly_dark")
         fig_s.update_traces(line_color="#3B82F6")
         st.plotly_chart(fig_s, use_container_width=True)
@@ -169,9 +168,4 @@ else:
     st.plotly_chart(fig_bar, use_container_width=True)
 
     if submit_button:
-        st.write("---")
-        st.subheader("🎯 Fact Extraction Breakdown")
-        
-        with st.spinner("Querying matrix properties..."):
-            time.sleep(0
-     
+        st.write("
