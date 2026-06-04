@@ -16,11 +16,10 @@ st.set_page_config(
 # --- DATA GENERATION (Dataset 1: BH-NS Mergers) ---
 @st.cache_data
 def load_waveform_data():
-    # Simulated mapping mimicking William Henry Lee's Newtonian physics SPH calculations
     t = np.linspace(-0.1, 0.02, 1200)
     frequency = 60 / (0.01 - t + 1e-5)**0.25 
     amplitude = 1e-21 * (0.01 - t + 1e-5)**-0.25
-    amplitude[t > 0.01] = 0  # Coalescence/disruption cutoff point
+    amplitude[t > 0.01] = 0  
     strain = amplitude * np.sin(2 * np.pi * frequency * t)
     radius = np.maximum(12, 110 * (0.01 - t + 1e-5)**0.25)
     energy_loss = 1e52 * (radius**-5)
@@ -36,7 +35,6 @@ def load_waveform_data():
 # --- DATA GENERATION (Dataset 2: Math Facts) ---
 @st.cache_data
 def load_math_facts():
-    # Structured to explicitly map to metadata fields: 'number' and 'text'
     facts = {
         "number": [1, 2, 3, 7, 12, 28, 42, 137],
         "text": [
@@ -47,7 +45,7 @@ def load_math_facts():
             "The number of edges on a cube and the base of the duodecimal numerical system.",
             "A perfect number equal to the exact sum of its proper positive divisors.",
             "The Answer to the Ultimate Question of Life, the Universe, and Everything.",
-            "Roughly the inverse of the Fine-Structure Constant, which dictates the strength of electromagnetic interaction."
+            "Roughly the inverse of the Fine-Structure Constant, which dictates electromagnetic interaction strength."
         ]
     }
     return pd.DataFrame(facts)
@@ -70,7 +68,6 @@ if app_mode == "🌌 BH-NS Binary Mergers":
     ns_mass = st.sidebar.slider("Neutron Star Mass (M☉)", 1.1, 2.5, 1.4, 0.1)
     separation = st.sidebar.number_input("Initial Orbit Separation (km)", 100, 600, 250)
     gamma_index = st.sidebar.selectbox("Ideal Gas Gamma Index (Equation of State)", [1.4, 1.67, 2.0])
-    
     submit_button = st.sidebar.button("💥 Simulate Coalescence", use_container_width=True)
 else:
     st.sidebar.subheader("Trivia Tuning")
@@ -86,7 +83,7 @@ if app_mode == "🌌 BH-NS Binary Mergers":
     st.caption("Investigating point-mass gravitational radiation backreaction and tidal disruptions via 3D SPH simulations.")
     st.markdown("This module explores gravitational radiation waveforms modeled using Newtonian physics combined with gas equations of state.")
     
-    # Render layout metrics natively to avoid HTML string token errors
+    # Render layout metrics natively
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         st.metric("Mass Ratio (q)", f"{bh_mass / ns_mass:.2f}")
@@ -106,7 +103,6 @@ if app_mode == "🌌 BH-NS Binary Mergers":
     with t1:
         fig_s = px.line(df_wave, x="Time (s)", y="Strain", title="Gravitational Radiation Strain Signature")
         fig_s.update_layout(template="plotly_dark")
-        # FIXED: Color hex code string is perfectly closed here
         fig_s.update_traces(line_color="#3B82F6")
         st.plotly_chart(fig_s, use_container_width=True)
         
@@ -178,3 +174,23 @@ else:
         matched_row = df_facts[df_facts["number"] == selected_num]
         
         if not matched_row.empty:
+            fact_text = matched_row.iloc[0]["text"]
+            st.balloons()
+            st.success(f"### 🎉 Mathematical Profile for Number {selected_num}")
+            st.markdown(f"> **{fact_text}**")
+        else:
+            st.warning(f"Number {selected_num} is not cached in the core CSV database. However, here is its baseline structural property:")
+            is_even = "Even" if selected_num % 2 == 0 else "Odd"
+            st.info(f"**Generic Property Matrix:** Number {selected_num} is an {is_even} integer, its square is {selected_num**2}, and its square root calculates to {np.sqrt(selected_num):.4f}.")
+            
+        st.subheader("📐 Multiplier Matrix Map")
+        x_vals = np.arange(1, 11)
+        y_vals = x_vals * selected_num
+        
+        fig_line = px.line(x=x_vals, y=y_vals, title=f"Linear Multiplier Scalability for Factor {selected_num}", labels={"x": "Multiplier Range", "y": "Product Amplitude"})
+        fig_line.update_layout(template="plotly_dark")
+        fig_line.update_traces(line_color="#10B981")
+        st.plotly_chart(fig_line, use_container_width=True)
+        
+    else:
+        st.info("💡 Pick an integer on the left panel and click Extract Trivia Fact to run an index look-up.")
